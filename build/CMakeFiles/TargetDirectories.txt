@@ -1,0 +1,3 @@
+/home/guli/Escritorio/c++/Facturacion (copia)/build/CMakeFiles/facturacion.dir
+/home/guli/Escritorio/c++/Facturacion (copia)/build/CMakeFiles/edit_cache.dir
+/home/guli/Escritorio/c++/Facturacion (copia)/build/CMakeFiles/rebuild_cache.dir

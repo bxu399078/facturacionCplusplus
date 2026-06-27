@@ -1,0 +1,42 @@
+name: C++20 CI Pipeline
+
+# Define qué eventos disparan la automatización
+on:
+  push:
+    branches: [ main, master ] # Se ejecuta al hacer push a estas ramas
+  pull_request:
+    branches: [ main, master ] # Se ejecuta al abrir un Pull Request
+
+jobs:
+  build-and-test:
+    # Usamos la última versión estable de Ubuntu disponible en GitHub
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Descargar el código del repositorio a la máquina virtual
+    - name: Checkout del código
+      uses: actions/checkout@v4
+
+    # 2. Instalar el compilador moderno (GCC 12) y dependencias de la base de datos
+    - name: Instalar GCC 12 y dependencias
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y g++-12 cmake libpq-dev
+
+    # 3. Configurar el entorno con CMake usando GCC 12 de forma explícita
+    - name: Configurar CMake
+      run: |
+        cmake -S . -B build \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_CXX_COMPILER=g++-12
+
+    # 4. Compilar el programa de facturación
+    - name: Compilar Proyecto
+      run: cmake --build build --config Release
+
+    # 5. Ejecutar las pruebas automáticas (QA)
+    # Si no tenés pruebas configuradas aún en CMake, podés comentar o borrar este paso
+    - name: Ejecutar Pruebas
+      run: |
+        cd build
+        ctest --output-on-failure

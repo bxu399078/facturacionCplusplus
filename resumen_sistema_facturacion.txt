@@ -1,0 +1,131 @@
+================================================================================
+RESUMEN DEL DESARROLLO: SISTEMA DE FACTURACIÓN ELECTRÓNICA (ARCA / AFIP) EN C++20
+================================================================================
+
+Este documento contiene el resumen detallado de la arquitectura, decisiones de
+diseño y refactorizaciones realizadas sobre el módulo de facturación electrónica
+`ArcaService` para la conexión con los web services de ARCA (ex-AFIP), utilizando
+C++20 moderno, OpenSSL y libcurl.
+
+--------------------------------------------------------------------------------
+1. DESCRIPCIÓN GENERAL DEL MÓDULO
+--------------------------------------------------------------------------------
+El archivo `arca_service.cpp` implementa la lógica necesaria para emitir Facturas
+Electrónicas en Argentina bajo las especificaciones de ARCA. El sistema opera
+en dos modalidades controladas por el constructor `ArcaService(bool mock)`:
+
+A) Modo Mock (Simulador):
+   - Permite probar el comportamiento del sistema sin conexión a internet ni
+     dependencias de certificados criptográficos.
+   - Introduce demoras artificiales (`std::this_thread::sleep_for`) de 500ms y
+     800ms para simular latencia de red.
+   - Genera tokens de prueba dinámicos usando marcas de tiempo (`std::time`).
+   - Calcula fechas de vencimiento de CAE automáticas a 15 días en el futuro
+     usando `std::chrono::system_clock::now() + std::chrono::days(15)`.
+
+B) Modo Real (`ARCA_REAL`):
+   - Se activa mediante la directiva de compilación `-DARCA_REAL`.
+   - Consume el servicio WSAA (Web Service de Autenticación y Autorización) para
+     obtener un Token y un Sign firmado digitalmente.
+   - Consume el servicio WSFE (Web Service de Facturación Electrónica) para
+     solicitar el CAE (Código de Autorización Electrónico) para las facturas.
+
+--------------------------------------------------------------------------------
+2. ANÁLISIS DEL MOTOR INTERNO Y CRIPTOGRAFÍA
+--------------------------------------------------------------------------------
+La interacción real exige interactuar con librerías nativas de C puro debido a
+la infraestructura de ARCA:
+
+- Generación del TRA: Crea el Ticket de Requerimiento de Acceso en formato XML,
+  estableciendo un identificador único y tiempos estrictos de generación y
+  expiración (validez de 12 horas) usando `<chrono>` y `std::put_time`.
+- Firma CMS (Cryptographic Message Syntax): Requisito obligatorio de ARCA.
+  El sistema lee el certificado público (.crt) y la clave privada (.key) desde
+  el disco y realiza la firma electrónica del TRA mediante las funciones nativas
+  de OpenSSL (`CMS_sign`).
+- Codificación Base64: La firma DER binaria resultante se convierte en texto
+  Base64 limpio mediante cadenas de BIOs (`BIO_f_base64` y `BIO_s_mem`) para su
+  transporte seguro dentro del sobre SOAP.
+- Comunicación HTTP/SOAP: Se utiliza `libcurl` para realizar las peticiones POST
+  enviando los sobres XML correspondientes a las URLs de homologación de ARCA.
+- Procesamiento XML: Se evita la sobrecarga de una librería parseadora compleja
+  implementando una utilidad optimizada de búsqueda de subcadenas (`extraerTag`)
+  para aislar tags específicos como `<token>`, `<sign>` y `<CAE>`.
+- Agrupación de IVA: La lógica de negocio consolida automáticamente los ítems de
+  la factura por su alícuota correspondiente (ej. 21%, 10.5%) mediante mapas de
+  C++ (`std::map<double, double>`), sumando las bases imponibles y los importes
+  de IVA de manera estricta tal como lo exige el fisco.
+
+--------------------------------------------------------------------------------
+3. REFACTORIZACIÓN SEGURA Y ADOPCIÓN DEL PARADIGMA RAII
+--------------------------------------------------------------------------------
+El código original presentaba vulnerabilidades típicas de la mezcla de C y C++,
+tales como el uso de punteros crudos (`*`) y la necesidad de liberación manual
+de recursos en bloques finales de limpieza. Si ocurría una excepción en medio
+de una función, el programa sufría pérdidas de memoria (memory leaks).
+
+Para solucionar esto, se migró la sección real por completo al paradigma RAII
+(Resource Acquisition Is Initialization) usando Punteros Inteligentes con
+Eliminadores Personalizados (Custom Deleters).
+
+Definiciones de Tipos RAII seguras implementadas:
+--------------------------------------------------------------------------------
+using BioPtr       = std::unique_ptr<BIO,           decltype(&BIO_free)>;
+using BioChainPtr  = std::unique_ptr<BIO,           decltype(&BIO_free_all)>;
+using X509Ptr      = std::unique_ptr<X509,          decltype(&X509_free)>;
+using EvpPkeyPtr   = std::unique_ptr<EVP_PKEY,      decltype(&EVP_PKEY_free)>;
+using CmsPtr       = std::unique_ptr<CMS_ContentInfo, decltype(&CMS_ContentInfo_free)>;
+using OpenSslMem   = std::unique_ptr<unsigned char, decltype(&OPENSSL_free)>;
+using CurlPtr      = std::unique_ptr<CURL,          decltype(&curl_easy_cleanup)>;
+using CurlSlistPtr = std::unique_ptr<curl_slist,    decltype(&curl_slist_free_all)>;
+--------------------------------------------------------------------------------
+
+Gracias a esto, funciones como `firmarCMS` encapsulan los recursos OpenSSL de
+inmediato. Si `CMS_sign` falla y lanza un `std::runtime_error`, las estructuras
+`cert`, `key` y `dataBio` se liberan solas de forma automática e instantánea al
+destruirse los objetos de la pila.
+
+--------------------------------------------------------------------------------
+4. BLINDAJE EXCEPCIONAL DE CABECERAS EN `soapRequest`
+--------------------------------------------------------------------------------
+Un punto crítico detectado fue el uso de la función `curl_slist_append` para las
+cabeceras de HTTP en CURL. Tradicionalmente, hacer esto de forma ingenua expone
+al programa a pérdidas de memoria si una inserción intermedia falla por falta de
+RAM, ya que la función devuelve `nullptr` y se pierde el puntero a los nodos
+previamente asignados.
+
+La solución de producción definitiva aplica el patrón de "liberación y reinicio"
+dentro del puntero inteligente:
+
+// Se inicializa la caja fuerte vacía
+CurlSlistPtr headers(nullptr, &curl_slist_free_all);
+
+// Se añade el primer elemento usando un puntero temporal seguro
+curl_slist* temp = curl_slist_append(headers.get(), "Content-Type: text/xml;charset=UTF-8");
+if (!temp) throw std::runtime_error("Error de memoria al crear cabeceras CURL");
+headers.release();  // Se cede el control del puntero anterior
+headers.reset(temp); // Se resguarda la nueva lista ampliada de forma segura
+
+// Se repite el proceso para cada cabecera subsiguiente
+temp = curl_slist_append(headers.get(), "SOAPAction: \"\"");
+if (!temp) throw std::runtime_error("Error de memoria al añadir SOAPAction");
+headers.release();
+headers.reset(temp);
+
+Este patrón garantiza seguridad matemática absoluta, ideal para entornos de
+servidores o daemons comerciales que deben correr de forma ininterrumpida por
+meses sin sufrir degradación de memoria.
+
+--------------------------------------------------------------------------------
+5. CONCLUSIONES Y RECOMENDACIONES DE ARQUITECTURA
+--------------------------------------------------------------------------------
+- Estabilidad: Con los cambios RAII aplicados, el código base de integración es
+  robusto y tolerante a fallos de red o errores criptográficos inesperados.
+- Alternativa de Interoperabilidad: Si en etapas futuras del proyecto la carga
+  bancaria o de mantenimiento de OpenSSL/CURL nativo en C++ se vuelve compleja
+  debido a actualizaciones del framework de ARCA, se recomienda aislar este
+  módulo en un microservicio de Python independiente, conectándolo al sistema
+  core de C++ mediante puentes de comunicación livianos (`pybind11` o sockets),
+  aprovechando la facilidad de Python para gestionar paquetes SOAP/XML de alto
+  nivel sin riesgos de corrupción de memoria.
+================================================================================

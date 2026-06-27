@@ -1,0 +1,193 @@
+%PDF-1.3
+%·¾­ª
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Kids [ 4 0 R ]
+/Count 1
+>>
+endobj
+3 0 obj
+<<
+/Producer (Haru Free PDF Library 2.3.0)
+>>
+endobj
+4 0 obj
+<<
+/Type /Page
+/MediaBox [ 0 0 595 842 ]
+/Contents 5 0 R
+/Resources <<
+/ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+/Font <<
+/F1 7 0 R
+>>
+>>
+/Parent 2 0 R
+>>
+endobj
+5 0 obj
+<<
+/Length 6 0 R
+>>
+stream
+/F1 20 Tf
+BT
+40 780 Td
+(Listado de Productos) Tj
+ET
+/F1 11 Tf
+BT
+40 740 Td
+(ID) Tj
+50 0 Td
+(Nombre) Tj
+280 0 Td
+(Cant.) Tj
+70 0 Td
+(Precio) Tj
+ET
+0.5 w
+40 734 m
+530 734 l
+S
+/F1 10 Tf
+BT
+40 720 Td
+(1) Tj
+50 0 Td
+(C++ Primer \0505th Edition\051) Tj
+280 0 Td
+(10) Tj
+70 0 Td
+($65.00) Tj
+ET
+BT
+40 702 Td
+(2) Tj
+50 0 Td
+(The C Programming Language \050K&R\051) Tj
+280 0 Td
+(8) Tj
+70 0 Td
+($55.50) Tj
+ET
+BT
+40 684 Td
+(3) Tj
+50 0 Td
+(Clean Code \050Robert C. Martin\051) Tj
+280 0 Td
+(15) Tj
+70 0 Td
+($45.00) Tj
+ET
+BT
+40 666 Td
+(4) Tj
+50 0 Td
+(Design Patterns \050GoF\051) Tj
+280 0 Td
+(12) Tj
+70 0 Td
+($52.00) Tj
+ET
+BT
+40 648 Td
+(5) Tj
+50 0 Td
+(Introduction to Algorithms \050CLRS\051) Tj
+280 0 Td
+(6) Tj
+70 0 Td
+($80.00) Tj
+ET
+BT
+40 630 Td
+(6) Tj
+50 0 Td
+(The Pragmatic Programmer) Tj
+280 0 Td
+(14) Tj
+70 0 Td
+($48.00) Tj
+ET
+BT
+40 612 Td
+(7) Tj
+50 0 Td
+(Structure and Interpretation of Computer Programs) Tj
+280 0 Td
+(7) Tj
+70 0 Td
+($58.00) Tj
+ET
+BT
+40 594 Td
+(8) Tj
+50 0 Td
+(Code Complete \050Steve McConnell\051) Tj
+280 0 Td
+(9) Tj
+70 0 Td
+($50.00) Tj
+ET
+BT
+40 576 Td
+(9) Tj
+50 0 Td
+(Refactoring \050Martin Fowler\051) Tj
+280 0 Td
+(11) Tj
+70 0 Td
+($42.00) Tj
+ET
+BT
+40 558 Td
+(10) Tj
+50 0 Td
+(The Art of Computer Programming \050Knuth\051) Tj
+280 0 Td
+(3) Tj
+70 0 Td
+($120.00) Tj
+ET
+
+endstream
+endobj
+6 0 obj
+1277
+endobj
+7 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica
+/Subtype /Type1
+/Encoding /StandardEncoding
+>>
+endobj
+xref
+0 8
+0000000000 65535 f
+0000000015 00000 n
+0000000064 00000 n
+0000000123 00000 n
+0000000184 00000 n
+0000000360 00000 n
+0000001691 00000 n
+0000001711 00000 n
+trailer
+<<
+/Root 1 0 R
+/Info 3 0 R
+/Size 8
+>>
+startxref
+1809
+%%EOF

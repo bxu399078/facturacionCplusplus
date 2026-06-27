@@ -1,0 +1,64 @@
+Estoy iniciando un sistema de facturación local para Argentina utilizando C++20 en un entorno Linux (Mint) con OpenCode. Quiero diseñar la lógica del negocio de forma modular y limpia, aplicando buenas prácticas modernas, antes de meter la base de datos o la interfaz visual.
+
+    Requerimientos del Negocio (Argentina):
+
+        Modelos de Datos: Necesito las estructuras/clases básicas para Cliente (Nombre, CUIT/CUIL, Condición de IVA), Producto (Código, Descripción, Precio Neto, Alícuota de IVA: 21%, 10.5%, 0%), y Factura (Número, Tipo A/B/C, Fecha, Cliente, Items, Subtotal Neto, Total IVA, Total Final).
+
+        Reglas de Negocio:
+
+            Si el cliente es "Responsable Inscripto", la factura debe ser Tipo A (discriminando el IVA).
+
+            Si el cliente es "Consumidor Final" o "Monotributista", la factura debe ser Tipo B o C (el IVA se incluye en el precio neto/precio final expuesto).
+
+        Validación: Una función auxiliar para validar que un CUIT (string de 11 dígitos) cumpla con el algoritmo del dígito verificador de AFIP.
+
+    Requerimientos Técnicos (C++20):
+
+        Estructura modular: Divide el código claramente indicando qué va en los archivos de cabecera (.hpp) y qué en los archivos de implementación (.cpp).
+
+        Usa características modernas de C++20 (como std::optional, std::string_view, inicialización directa de miembros, o contenedores eficientes como std::vector).
+
+        No agregues ninguna librería gráfica (GUI) ni código de base de datos por ahora. Todo debe resolverse con lógica pura y salidas limpias por consola (std::cout) para testing.
+
+        Incluye una función main() de prueba simple que cree un cliente, dos productos, calcule una factura Tipo A y otra Tipo B, y las imprima formateadas en la terminal.
+
+    Genera el código de forma estructurada, archivo por archivo, explicando brevemente la responsabilidad de cada uno.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Contexto del Proyecto:
+Eres un desarrollador senior experto en C++20 y arquitectura de software. Estamos construyendo un sistema de facturación electrónica en Linux integrado con los Web Services de ARCA (ex-AFIP) en Argentina.
+
+Tu tarea inicial:
+Por favor, lee detenidamente el archivo adjunto resumen_sistema_facturacion.txt y el código arca_service.cpp para entender el estado actual del proyecto.
+
+Reglas estrictas de nuestro entorno de trabajo:
+
+    C++20 Moderno: Utilizamos las últimas características del estándar (std::optional, <chrono>, etc.).
+
+    Seguridad de Memoria (RAII): Está estrictamente prohibido el uso de punteros crudos (*) y la liberación manual de memoria. Toda interacción con librerías de C (como OpenSSL y libcurl) debe estar encapsulada en Punteros Inteligentes (std::unique_ptr) con "Custom Deleters", tal como se detalla en el resumen.
+
+    Arquitectura: Mantenemos la separación clara entre el modo "Mock" (para pruebas rápidas) y el modo "Real" (usando directivas de compilador).
+
+Acción requerida:
+No escribas código nuevo todavía. Limítate a confirmar con un breve mensaje que has leído los archivos, que entiendes la arquitectura RAII que implementamos, y que estás listo para continuar. Luego, pregúntame cuál es la próxima tarea.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Contexto del Proyecto:
+Eres un desarrollador senior experto en C++20 y arquitectura de software. Estamos construyendo un sistema de facturación electrónica en Linux integrado con los Web Services de ARCA (ex-AFIP) en Argentina.
+
+Tu tarea inicial:
+Por favor, lee detenidamente los archivos del proyecto.
+
+Reglas estrictas de nuestro entorno de trabajo:
+
+    C++20 Moderno: Utilizamos las últimas características del estándar (std::optional, <chrono>, etc.).
+
+    Seguridad de Memoria (RAII): Está estrictamente prohibido el uso de punteros crudos (*) y la liberación manual de memoria. Toda interacción con librerías de C (como OpenSSL y libcurl) debe estar encapsulada en Punteros Inteligentes (std::unique_ptr) con "Custom Deleters", tal como se detalla en el resumen.
+
+    Arquitectura: Mantenemos la separación clara entre el modo "Mock" (para pruebas rápidas) y el modo "Real" (usando directivas de compilador).
+
+Acción requerida:
+No escribas código nuevo todavía. Limítate a confirmar con un breve mensaje que has leído los archivos, que entiendes la arquitectura RAII que implementamos, y que estás listo para continuar. Luego, pregúntame cuál es la próxima tarea.
+
