@@ -123,7 +123,7 @@ static void mostrarMenu() {
 
 static void moduloInformes() {
     limpiarPantalla();
-    term::titulo("INFORMES");
+    term::titulo("INFORMETAZOS");
     std::cout << "\n"
               << "    " << term::YELLOW << "1)" << term::RESET << " Reporte de Clientes\n"
               << "    " << term::YELLOW << "2)" << term::RESET << " Listado de Productos\n"
